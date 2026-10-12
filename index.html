@@ -1,0 +1,510 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Hero's Dice Tray</title>
+<meta name="description" content="A free, private d20 dice tray for The Ashen Reach Chronicles and The Broken Compass. No ads, no accounts, works offline.">
+<meta name="theme-color" content="#2c4638">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Dice Tray">
+<style>
+@font-face{font-family:"Alegreya SC";font-style:normal;font-weight:500;font-display:swap;src:url("fonts/alegreya-sc-latin-500-normal.woff2") format("woff2")}
+@font-face{font-family:"Alegreya SC";font-style:normal;font-weight:700;font-display:swap;src:url("fonts/alegreya-sc-latin-700-normal.woff2") format("woff2")}
+@font-face{font-family:"Alegreya SC";font-style:normal;font-weight:800;font-display:swap;src:url("fonts/alegreya-sc-latin-800-normal.woff2") format("woff2")}
+@font-face{font-family:"Alegreya";font-style:normal;font-weight:400;font-display:swap;src:url("fonts/alegreya-latin-400-normal.woff2") format("woff2")}
+@font-face{font-family:"Alegreya";font-style:normal;font-weight:600;font-display:swap;src:url("fonts/alegreya-latin-600-normal.woff2") format("woff2")}
+@font-face{font-family:"Alegreya";font-style:italic;font-weight:400;font-display:swap;src:url("fonts/alegreya-latin-400-italic.woff2") format("woff2")}
+@font-face{font-family:"IBM Plex Mono";font-style:normal;font-weight:500;font-display:swap;src:url("fonts/ibm-plex-mono-latin-500-normal.woff2") format("woff2")}
+@font-face{font-family:"IBM Plex Mono";font-style:normal;font-weight:600;font-display:swap;src:url("fonts/ibm-plex-mono-latin-600-normal.woff2") format("woff2")}
+</style>
+</head>
+<body>
+<style>
+/* Layout: a felt dice tray (left) beside the hero's ledger (right); task timer + menu below. Stacks on phones. */
+:root{
+  --bg:#e7ebe5; --surface:#f6f7f3; --ink:#1e2521; --muted:#58635c; --line:#c7cec5;
+  --brass:#8f6316; --brass-soft:#e9dcc0; --felt:#2c4638; --felt-2:#243b2f; --felt-ink:#f2ecda; --felt-muted:#b9c7b8;
+  --hit:#2d7a4c; --miss:#a5322c; --glass1:#b8322f; --glass2:#2f62a8; --glass3:#c9952b; --glass4:#3c8a5a; --glass5:#7a4aa0; --glass6:#d0662a;
+  --display:"Alegreya SC", "Palatino Linotype", Palatino, Georgia, serif;
+  --body:"Alegreya", "Palatino Linotype", Palatino, Georgia, serif;
+  --mono:"IBM Plex Mono", ui-monospace, Menlo, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
+  --bg:#101613; --surface:#18201c; --ink:#e7ebe3; --muted:#9aa69e; --line:#2d3832;
+  --brass:#d9a94c; --brass-soft:#3a3020; --felt:#1d3529; --felt-2:#162a20; --felt-ink:#f2ecda; --felt-muted:#a9bba9;
+  --hit:#5cc58b; --miss:#e86a61; color-scheme:dark } }
+:root[data-theme="dark"]{
+  --bg:#101613; --surface:#18201c; --ink:#e7ebe3; --muted:#9aa69e; --line:#2d3832;
+  --brass:#d9a94c; --brass-soft:#3a3020; --felt:#1d3529; --felt-2:#162a20; --felt-ink:#f2ecda; --felt-muted:#a9bba9;
+  --hit:#5cc58b; --miss:#e86a61; color-scheme:dark }
+
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:17px;line-height:1.5;padding-inline:16px;padding-block:20px 48px}
+.wrap{max-width:1120px;margin:0 auto;display:flex;flex-direction:column;gap:22px}
+h1,h2,h3{font-family:var(--display);text-wrap:balance;margin:0;font-weight:700;letter-spacing:.02em}
+header{display:flex;flex-wrap:wrap;align-items:end;justify-content:space-between;gap:8px 20px;border-bottom:1px solid var(--line);padding-bottom:12px}
+header h1{font-size:clamp(1.9rem,4vw,2.6rem);font-weight:800}
+header p{margin:0;color:var(--muted);max-width:52ch}
+.grid{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(0,1fr);gap:22px;align-items:start}
+@media (max-width:860px){.grid{grid-template-columns:minmax(0,1fr)}}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:18px;display:flex;flex-direction:column;gap:14px;min-width:0}
+.panel h2{font-size:1.35rem}
+.label{font-family:var(--display);font-size:.8rem;letter-spacing:.08em;color:var(--muted);text-transform:uppercase}
+.row{display:flex;flex-wrap:wrap;gap:10px;align-items:end}
+.field{display:flex;flex-direction:column;gap:4px;min-width:0}
+input,select,button{font:inherit;color:inherit}
+input[type=number],input[type=text],select{background:var(--bg);border:1px solid var(--line);border-radius:6px;padding:6px 8px;min-height:38px}
+input[type=number]{width:5.2em;font-family:var(--mono);font-variant-numeric:tabular-nums}
+input[type=text]{width:100%}
+button{cursor:pointer;border-radius:7px;border:1px solid var(--line);background:var(--surface);padding:7px 12px;min-height:38px}
+button:hover{border-color:var(--brass)}
+:focus-visible{outline:3px solid var(--brass);outline-offset:2px}
+.btn-brass{background:var(--brass);color:var(--surface);border-color:var(--brass);font-family:var(--display);font-weight:700;letter-spacing:.04em}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{min-height:32px;padding:3px 10px;font-family:var(--mono);font-size:.9rem}
+.chip[aria-pressed="true"]{background:var(--brass-soft);border-color:var(--brass);color:var(--ink)}
+.check{display:flex;gap:8px;align-items:center;min-height:38px}
+.check input{width:20px;height:20px;accent-color:var(--brass)}
+
+/* the tray */
+.tray{background:radial-gradient(120% 90% at 50% 30%, var(--felt), var(--felt-2));color:var(--felt-ink);border-radius:14px;padding:20px;display:flex;flex-direction:column;gap:16px;box-shadow:inset 0 0 0 6px color-mix(in srgb,var(--brass) 55%, transparent), inset 0 8px 30px rgba(0,0,0,.35)}
+.tray .label{color:var(--felt-muted)}
+.tray input[type=number],.tray select{background:rgba(0,0,0,.25);border-color:rgba(255,255,255,.18);color:var(--felt-ink)}
+.tray button{background:rgba(0,0,0,.22);border-color:rgba(255,255,255,.2);color:var(--felt-ink)}
+.tray button:hover{border-color:var(--brass)}
+.tray .chip[aria-pressed="true"]{background:var(--brass);border-color:var(--brass);color:#1b1408}
+.tray .btn-brass{background:var(--brass);color:#1b1408;border-color:var(--brass);font-size:1.15rem;padding:10px 26px}
+.stage{display:grid;grid-template-columns:auto minmax(0,1fr);gap:18px;align-items:center}
+@media (max-width:520px){.stage{grid-template-columns:minmax(0,1fr);justify-items:center;text-align:center}}
+.dice{display:flex;gap:10px}
+.d20{width:118px;height:118px;flex:none}
+.d20.small{width:78px;height:78px;opacity:.55}
+.d20 polygon,.d20 line{fill:none;stroke:var(--brass);stroke-width:2.2;stroke-linejoin:round}
+.d20 .face{fill:rgba(0,0,0,.28)}
+.d20 text{fill:var(--felt-ink);font-family:var(--display);font-weight:800;font-size:34px;text-anchor:middle;dominant-baseline:central}
+.d20.spin{animation:tumble .55s cubic-bezier(.3,.7,.3,1)}
+@keyframes tumble{0%{transform:rotate(-200deg) scale(.6);opacity:.3}70%{transform:rotate(12deg) scale(1.06)}100%{transform:none}}
+@media (prefers-reduced-motion:reduce){.d20.spin{animation:none}}
+.verdict{font-family:var(--display);font-size:clamp(1.8rem,4.5vw,2.5rem);font-weight:800;line-height:1.1}
+.verdict.hit{color:#8fe0ae}.verdict.miss{color:#ff9a90}.verdict.idle{color:var(--felt-muted)}
+.math{font-family:var(--mono);font-size:.95rem;color:var(--felt-muted);font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
+.note{font-size:1rem;margin:0}
+.rally{display:flex;flex-wrap:wrap;gap:8px}
+
+/* ledger */
+.stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+@media (max-width:400px){.stats{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.stat{border:1px solid var(--line);border-radius:8px;padding:8px;display:flex;flex-direction:column;align-items:center;gap:2px;background:var(--bg)}
+.stat .mod{font-family:var(--mono);font-weight:600;font-size:1.15rem;font-variant-numeric:tabular-nums}
+.stat input{width:4em;text-align:center}
+.purse{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+@media (max-width:460px){.purse{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.purse .field input{width:100%}
+.window-wrap{display:flex;gap:14px;align-items:center;flex-wrap:wrap}
+.window{width:108px;height:150px;flex:none}
+.window path{stroke:var(--ink);stroke-width:2.5;stroke-linejoin:round}
+.window .off{fill:var(--bg)}
+.history{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:4px;font-family:var(--mono);font-size:.85rem;color:var(--felt-muted);max-height:9.5em;overflow:auto}
+.history li{display:flex;gap:8px;justify-content:space-between;border-top:1px dashed rgba(255,255,255,.12);padding-top:3px}
+.history .h{color:#8fe0ae}.history .m{color:#ff9a90}
+
+/* timer + menu */
+.timer{font-family:var(--mono);font-size:clamp(2.4rem,7vw,3.4rem);font-weight:600;font-variant-numeric:tabular-nums;line-height:1}
+.timer.done{color:var(--hit)}
+.table-wrap{overflow-x:auto}
+table{border-collapse:collapse;width:100%;min-width:560px;font-size:.95rem}
+th,td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-family:var(--display);font-size:.8rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+td:first-child{font-family:var(--display);font-weight:700;white-space:nowrap}
+.fine{font-size:.9rem;color:var(--muted);margin:0}
+.explain{border:1px solid var(--line);border-radius:8px;padding:10px 14px;background:var(--bg)}
+.explain summary{cursor:pointer;font-family:var(--display);font-weight:700;font-size:1.05rem}
+.explain p{margin:.6em 0;max-width:65ch}
+table.mini{min-width:420px;font-family:var(--mono);font-size:.85rem}
+table.mini th,table.mini td{padding:5px 8px;text-align:center}
+table.mini th{text-align:left}
+.stat .hint{font-size:.78rem;color:var(--muted);text-align:center;line-height:1.25}
+.badge{font-family:var(--mono);font-size:.8rem;border:1px solid var(--line);border-radius:999px;padding:2px 8px;color:var(--muted)}
+.worlds{display:flex;gap:6px;flex-wrap:wrap}
+.worlds .chip{font-family:var(--display);font-size:.95rem;letter-spacing:.03em}
+.strain{display:flex;gap:6px;align-items:center}
+.pip{width:22px;height:22px;border-radius:50%;border:2px solid var(--felt-ink);opacity:.5}
+.pip.on{background:#ff9a90;border-color:#ff9a90;opacity:1}
+.prog{display:flex;flex-direction:column;gap:6px}
+.bar{height:12px;border-radius:999px;background:rgba(0,0,0,.3);overflow:hidden;border:1px solid rgba(255,255,255,.18)}
+.bar i{display:block;height:100%;background:var(--brass);width:0;transition:width .3s}
+@media (prefers-reduced-motion:reduce){.bar i{transition:none}}
+.capnote{font-size:.85rem;color:var(--felt-muted)}
+.stats.ten{grid-template-columns:repeat(2,minmax(0,1fr))}
+</style>
+
+<div class="wrap">
+  <header>
+    <div>
+      <h1>Hero's Dice Tray</h1>
+      <p>Do your real task first, then roll here. Pick your world; each keeps its own hero.</p>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:6px;align-items:flex-end">
+      <div class="worlds chips" role="group" aria-label="World" id="worldChips">
+        <button class="chip" data-world="ashen" aria-pressed="true">The Ashen Reach</button>
+        <button class="chip" data-world="compass" aria-pressed="false">The Broken Compass</button>
+      </div>
+      <span class="badge" id="saveBadge">Saved only in this browser</span>
+    </div>
+  </header>
+
+  <div class="grid">
+    <section class="tray" aria-labelledby="trayTitle">
+      <h2 id="trayTitle" style="font-size:1.35rem">The Roll</h2>
+      <div class="row">
+        <div class="field"><label class="label" for="statSel">Stat</label><select id="statSel"></select></div>
+        <label class="check"><input type="checkbox" id="trained"> Trained</label>
+        <div class="field"><label class="label" for="gear" id="gearLabel">Gear</label><input type="number" id="gear" min="0" max="10" value="1"></div>
+        <div class="field"><label class="label" for="extra" id="extraLabel">Other bonus</label><input type="number" id="extra" min="-5" max="10" value="0"></div>
+        <label class="check" id="wearyWrap"><input type="checkbox" id="weary"> Weary (−1)</label>
+      </div>
+      <p class="capnote" id="capNote" hidden>Season One rule: gear, preparation and helpers add +1 each, up to +3 in total.</p>
+
+      <div class="field">
+        <span class="label" id="dcLabel">Target (DC)</span>
+        <div class="row">
+          <div class="chips" role="group" aria-labelledby="dcLabel" id="dcChips"></div>
+          <input type="number" id="dc" min="1" max="40" value="10" aria-label="Custom DC">
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="chips" role="group" aria-label="Roll mode" id="modeChips">
+          <button class="chip" data-mode="normal" aria-pressed="true">Normal</button>
+          <button class="chip" data-mode="adv" aria-pressed="false">Advantage</button>
+          <button class="chip" data-mode="dis" aria-pressed="false">Disadvantage</button>
+        </div>
+        <button id="spendAdv" hidden>Spend an Advantage Token</button>
+      </div>
+
+      <div class="prog" id="progWrap" hidden>
+        <div class="row" style="align-items:center">
+          <label class="check"><input type="checkbox" id="progOn"> Track Progress</label>
+          <div class="field"><label class="label" for="progTarget">Progress needed</label><input type="number" id="progTarget" min="1" max="40" value="4"></div>
+          <label class="check"><input type="checkbox" id="solo" checked> Playing solo (halve it)</label>
+          <button id="progReset">Reset</button>
+        </div>
+        <div class="bar" aria-hidden="true"><i id="progBar"></i></div>
+        <span class="math" id="progText"></span>
+      </div>
+
+      <div class="stage">
+        <div class="dice" id="dice" aria-hidden="true"></div>
+        <div style="display:flex;flex-direction:column;gap:6px;min-width:0" aria-live="polite">
+          <div class="verdict idle" id="verdict">Ready when you are</div>
+          <div class="math" id="math">Task done? Then roll.</div>
+          <p class="note" id="note"></p>
+          <div class="rally" id="rally" hidden>
+            <button id="rallyBtn">I did a Tiny task: Rally!</button>
+            <button id="wearyBtn">Skip and take Weary</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="field" id="strainWrap" hidden>
+        <span class="label">Strain</span>
+        <div class="row" style="align-items:center">
+          <div class="strain" id="strainPips"></div>
+          <button id="strainClear">Did a Self-Care task: clear 1</button>
+        </div>
+        <span class="capnote" id="strainNote"></span>
+      </div>
+
+      <div class="row">
+        <button class="btn-brass" id="rollBtn">Roll the d20</button>
+        <button id="beatBtn">Beat done: +10 XP &amp; a shard</button>
+      </div>
+
+      <div class="field">
+        <span class="label">Recent rolls</span>
+        <ul class="history" id="history"><li><span>No rolls yet</span></li></ul>
+      </div>
+    </section>
+
+    <section class="panel" aria-labelledby="ledgerTitle">
+      <div class="row" style="justify-content:space-between;align-items:center">
+        <h2 id="ledgerTitle">Hero's Ledger</h2>
+        <button id="resetHero">Start a new hero</button>
+      </div>
+      <p class="fine" id="exampleNote">This is an example hero. Change anything; it's yours.</p>
+      <div class="row">
+        <div class="field" style="flex:2 1 12rem"><label class="label" for="heroName">Hero name</label><input type="text" id="heroName"></div>
+        <div class="field"><label class="label" for="prof">Proficiency</label><select id="prof"></select></div>
+      </div>
+
+      <div class="stats" id="stats"></div>
+
+      <details class="explain" open>
+        <summary>Why do some stats have a plus?</summary>
+        <p>Each stat has a <strong>score</strong> (the number you type, usually 8 to 20) and a <strong>bonus</strong> (the small + or − number under it). Only the bonus gets added to your roll. A score of 10 or 11 is ordinary, so its bonus is +0. Every 2 points above 10 adds +1. Below 10, the bonus goes negative.</p>
+        <div class="table-wrap">
+          <table class="mini">
+            <thead><tr><th scope="col">Score</th><td>8–9</td><td>10–11</td><td>12–13</td><td>14–15</td><td>16–17</td><td>18–19</td><td>20</td></tr></thead>
+            <tbody><tr><th scope="row">Bonus</th><td>−1</td><td>+0</td><td>+1</td><td>+2</td><td>+3</td><td>+4</td><td>+5</td></tr></tbody>
+          </table>
+        </div>
+        <p><strong>What adds up when you roll:</strong> the d20 + the stat's bonus + your proficiency (only if you tick <em>Trained</em>, meaning your hero is practiced at this kind of thing) + <span id="explainBonus">gear + any other bonus from items or companions</span>. Meet or beat the DC and it's a hit.</p>
+        <p id="explainExample"></p>
+        <p class="fine">Your scores grow as you level up, which is how your bonuses climb toward the big DCs later on.</p>
+      </details>
+
+      <div class="purse" id="purse"></div>
+      <div class="row" id="rewardBtns"></div>
+
+      <div class="field">
+        <span class="label">Today's stained-glass window</span>
+        <div class="window-wrap">
+          <svg class="window" id="window" viewBox="0 0 108 150" role="img" aria-label="Stained-glass window"></svg>
+          <div style="display:flex;flex-direction:column;gap:6px;min-width:0;flex:1 1 10rem">
+            <p class="note" id="windowNote" style="margin:0"></p>
+            <div class="row"><button id="shardBtn">Color a shard</button><button id="newDayBtn">New day</button></div>
+            <p class="fine">A missed day never cracks the window. It just waits.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <div class="grid">
+    <section class="panel" aria-labelledby="timerTitle">
+      <h2 id="timerTitle">Task Timer</h2>
+      <p class="fine">Hard to start or finish? Set a timer and work until it rings. When it rings, the task counts. Progress beats perfection.</p>
+      <div class="chips" role="group" aria-label="Timer length" id="timerChips">
+        <button class="chip" data-min="2" aria-pressed="true">2 min</button>
+        <button class="chip" data-min="5" aria-pressed="false">5 min</button>
+        <button class="chip" data-min="10" aria-pressed="false">10 min</button>
+        <button class="chip" data-min="20" aria-pressed="false">20 min</button>
+      </div>
+      <div class="timer" id="timer" aria-live="polite">2:00</div>
+      <div class="row"><button class="btn-brass" id="timerStart">Start</button><button id="timerReset">Reset</button></div>
+    </section>
+
+    <section class="panel" aria-labelledby="menuTitle">
+      <h2 id="menuTitle">Task Menu</h2>
+      <p class="fine">A scene names a category. Pick any task from it, sized to your day. Tiny always counts.</p>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th scope="col">Category</th><th scope="col">Tiny (about 2 min)</th><th scope="col">Steady</th><th scope="col">Big</th></tr></thead>
+          <tbody>
+            <tr><td>Body</td><td>5 shoulder rolls</td><td>10-minute walk or stretch</td><td>Full workout or long walk</td></tr>
+            <tr><td>Home</td><td>Put away 5 things</td><td>One surface or load of dishes</td><td>One whole room</td></tr>
+            <tr><td>Work &amp; Study</td><td>Open the thing you're avoiding</td><td>10 focused minutes on it</td><td>Finish one piece of it</td></tr>
+            <tr><td>Mind</td><td>Write tomorrow's top 3</td><td>Read or learn for 10 minutes</td><td>Plan the week</td></tr>
+            <tr><td>Heart</td><td>3 slow breaths</td><td>Box breathing or 5-4-3-2-1</td><td>Journal a page</td></tr>
+            <tr><td>Self-Care</td><td>A glass of water</td><td>Brush teeth, wash face, real meal</td><td>A shower, or bed on time</td></tr>
+            <tr><td>Kindness</td><td>Thank someone</td><td>A kind message or call</td><td>Help with someone's task</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </div>
+
+  <p class="fine">Real life comes first. Change any task so it's right for you today. This page never sends anything anywhere: your heroes are kept only in this browser on this device.</p>
+</div>
+
+<script>
+(function(){
+  const WORLDS={
+    ashen:{
+      stats:[["STR","Strength","lifting, hauling, pushing"],["DEX","Dexterity","balance, speed, nimble hands"],["CON","Constitution","stamina, cold, keeping going"],["INT","Intelligence","puzzles, plans, reading"],["WIS","Wisdom","calm, noticing, staying grounded"],["CHA","Charisma","kindness, courage, rallying people"]],
+      prof:[[2,"+2 (Book I)"],[3,"+3 (Book II)"],[4,"+4 (Book III)"]],
+      dcs:[8,10,11,12,13,14,15,16,17,18,20,22,25,30],
+      gearLabel:"Gear", extraLabel:"Other bonus", cap:null, miss:"weary",
+      purse:[["xp","XP"],["coins","Coins"],["shards","Glass Shards"],["tokens","Tokens"]],
+      rewards:[["Chapter done: +50 XP, +10 coins",{xp:50,coins:10}],["Board posting: +5 XP, +3 coins, +1 shard",{xp:5,coins:3,shards:1}]],
+      explainBonus:"gear + any other bonus from items or companions",
+      example:"<strong>Example:</strong> Wren has Wisdom 15, so her Wisdom bonus is +2. She's trained (+2) and carries gear (+1). She rolls a 9: 9 + 2 + 2 + 1 = 14.",
+      sample:{name:"Ember of Keldoria",prof:2,stats:{STR:12,DEX:14,CON:13,INT:10,WIS:15,CHA:11},xp:120,coins:23,shards:2,tokens:1,lit:2,stat:"WIS",trained:true,gear:1,extra:0,weary:false,dc:10}
+    },
+    compass:{
+      stats:[["STR","Strength","lifting, carrying"],["AGI","Agility","quick, nimble, balanced"],["END","Endurance","keeping going"],["INT","Intelligence","puzzles, maps, records"],["WIS","Wisdom","noticing, judging, calm"],["FOC","Focus","sticking with it"],["CHA","Charisma","persuading, kindness"],["TEAM","Teamwork","working together"],["CRE","Creativity","clever fixes, art"],["LIFE","Life Skills","cooking, care, mending"]],
+      prof:[[2,"+2 (Levels 1–4)"],[3,"+3 (Levels 5–8)"],[4,"+4 (Levels 9–10)"]],
+      dcs:[5,8,11,14,17,20,25],
+      gearLabel:"Gear & prep", extraLabel:"Helpers", cap:3, miss:"strain",
+      purse:[["xp","XP"],["coins","Coins"],["adv","Advantage Tokens"],["rec","Recovery Tokens"]],
+      rewards:[["Board posting: +15 XP",{xp:15}],["+25 XP",{xp:25}],["Episode: +10 coins",{coins:10}]],
+      explainBonus:"gear, preparation and helpers (+1 each, up to +3 in total)",
+      example:"<strong>Example:</strong> Juniper has Endurance 14, so her bonus is +2. She's trained in Navigation (+2) and carries a paper map (+1). She rolls a 9: 9 + 2 + 2 + 1 = 14, which meets DC 14.",
+      sample:{name:"Juniper of Haven Hearth",prof:2,stats:{STR:10,AGI:12,END:14,INT:13,WIS:12,FOC:11,CHA:13,TEAM:14,CRE:12,LIFE:10},xp:150,coins:14,adv:1,rec:1,lit:1,stat:"END",trained:true,gear:1,extra:0,strain:0,dc:14,progOn:false,progTarget:4,solo:true,prog:0}
+    }
+  };
+  const $=id=>document.getElementById(id);
+  const mod=s=>Math.floor((s-10)/2);
+  const sign=n=>(n>=0?"+":"−")+Math.abs(n);
+  const clone=o=>JSON.parse(JSON.stringify(o));
+  const get=k=>{try{return localStorage.getItem(k);}catch(e){return null;}};
+  const put=(k,v)=>{try{localStorage.setItem(k,v);return true;}catch(e){return false;}};
+
+  let world=get("hdt-world")==="compass"?"compass":"ashen";
+  let W, S;
+  function load(){
+    W=WORLDS[world];
+    let raw=get("hdt-"+world+"-v1");
+    if(!raw && world==="ashen") raw=get("heros-dice-tray-v1");
+    try{ S=JSON.parse(raw||"null"); }catch(e){ S=null; }
+    if(!S||!S.stats||Object.keys(S.stats).length!==W.stats.length){ S=clone(W.sample); S.example=true; }
+    S.mode=S.mode||"normal"; S.history=S.history||[];
+  }
+  function save(){ $("saveBadge").textContent=put("hdt-"+world+"-v1",JSON.stringify(S))&&put("hdt-world",world)?"Saved only in this browser":"Not saved (storage blocked)"; }
+  function d20(){ const a=new Uint32Array(1); let v; do{ crypto.getRandomValues(a); v=a[0]; }while(v>=4294967280); return (v%20)+1; }
+  function bonusTotal(){ const t=(S.gear||0)+(S.extra||0); return W.cap?Math.min(W.cap,t):t; }
+  function progNeed(){ const t=S.progTarget||4; return S.solo?Math.ceil(t/2):t; }
+
+  function build(){
+    [...$("worldChips").children].forEach(b=>b.setAttribute("aria-pressed",String(b.dataset.world===world)));
+    $("statSel").innerHTML=""; $("stats").innerHTML=""; $("stats").classList.toggle("ten",world==="compass");
+    W.stats.forEach(([k,n,h])=>{
+      const box=document.createElement("div"); box.className="stat";
+      box.innerHTML=`<label class="label" for="s_${k}">${n}</label><span class="hint">${h}</span><input type="number" id="s_${k}" min="1" max="30" aria-label="${n} score"><span class="mod" id="m_${k}" title="Bonus added to rolls"></span>`;
+      $("stats").appendChild(box);
+      const o=document.createElement("option"); o.value=k; $("statSel").appendChild(o);
+    });
+    $("prof").innerHTML=W.prof.map(([v,t])=>`<option value="${v}">${t}</option>`).join("");
+    $("dcChips").innerHTML=W.dcs.map(v=>`<button class="chip" data-dc="${v}">${v}</button>`).join("");
+    $("purse").innerHTML=W.purse.map(([k,t])=>`<div class="field"><label class="label" for="p_${k}">${t}</label><input type="number" id="p_${k}" min="0"></div>`).join("");
+    $("rewardBtns").innerHTML=W.rewards.map((r,i)=>`<button data-reward="${i}">${r[0]}</button>`).join("");
+    $("gearLabel").textContent=W.gearLabel; $("extraLabel").textContent=W.extraLabel;
+    $("capNote").hidden=!W.cap; $("wearyWrap").hidden=W.miss!=="weary";
+    $("strainWrap").hidden=W.miss!=="strain"; $("progWrap").hidden=world!=="compass"; $("spendAdv").hidden=world!=="compass";
+    $("wearyBtn").textContent=W.miss==="weary"?"Skip and take Weary":"Skip and take 1 Strain";
+    $("explainBonus").textContent=W.explainBonus; $("explainExample").innerHTML=W.example;
+    $("dice").innerHTML=dieSVG("20"); idle();
+    render();
+  }
+  function idle(){ $("verdict").className="verdict idle"; $("verdict").textContent="Ready when you are"; $("math").textContent="Task done? Then roll."; $("note").textContent=""; $("rally").hidden=true; }
+  function render(){
+    $("heroName").value=S.name; $("prof").value=String(S.prof);
+    W.stats.forEach(([k])=>{ $("s_"+k).value=S.stats[k]; $("m_"+k).textContent=sign(mod(S.stats[k])); });
+    [...$("statSel").options].forEach(o=>{ const n=W.stats.find(s=>s[0]===o.value)[1]; o.textContent=`${n} (${sign(mod(S.stats[o.value]))})`; });
+    $("statSel").value=S.stat; $("trained").checked=!!S.trained; $("gear").value=S.gear||0; $("extra").value=S.extra||0; $("weary").checked=!!S.weary; $("dc").value=S.dc;
+    W.purse.forEach(([k])=>$("p_"+k).value=S[k]||0);
+    [...$("dcChips").children].forEach(b=>b.setAttribute("aria-pressed",String(+b.dataset.dc===+S.dc)));
+    [...$("modeChips").children].forEach(b=>b.setAttribute("aria-pressed",String(b.dataset.mode===S.mode)));
+    $("exampleNote").hidden=!S.example;
+    if(world==="compass"){
+      $("progOn").checked=!!S.progOn; $("progTarget").value=S.progTarget||4; $("solo").checked=S.solo!==false;
+      const need=progNeed(), have=Math.min(S.prog||0,need);
+      $("progBar").style.width=(S.progOn?Math.round(100*have/need):0)+"%";
+      $("progText").textContent=S.progOn?`Progress ${have} of ${need}${have>=need?" · challenge complete!":""}`:"Turn on for big challenges, like the Pathling (Progress 4).";
+      $("strainPips").innerHTML=[0,1,2].map(i=>`<span class="pip ${i<(S.strain||0)?"on":""}"></span>`).join("");
+      $("strainNote").textContent=(S.strain||0)>=3?"Strain 3: this scene moves to recovery. Rest, or do a Self-Care task.":`${S.strain||0} of 3`;
+    }
+    renderWindow(); renderHistory();
+  }
+  function dieSVG(n,small){ return `<svg class="d20${small?" small":""}" viewBox="0 0 120 120"><polygon class="face" points="60,6 108,33 108,87 60,114 12,87 12,33"/><polygon points="60,6 108,33 108,87 60,114 12,87 12,33"/><polygon points="60,26 92,80 28,80"/><line x1="60" y1="6" x2="60" y2="26"/><line x1="108" y1="33" x2="92" y2="80"/><line x1="12" y1="33" x2="28" y2="80"/><line x1="108" y1="87" x2="92" y2="80"/><line x1="12" y1="87" x2="28" y2="80"/><line x1="60" y1="114" x2="92" y2="80"/><line x1="60" y1="114" x2="28" y2="80"/><line x1="12" y1="33" x2="60" y2="26"/><line x1="108" y1="33" x2="60" y2="26"/><text x="60" y="62">${n}</text></svg>`; }
+
+  function readInputs(){
+    S.name=$("heroName").value; S.prof=+$("prof").value||2;
+    W.stats.forEach(([k])=>{ const v=parseInt($("s_"+k).value,10); S.stats[k]=isNaN(v)?10:Math.max(1,Math.min(30,v)); });
+    S.stat=$("statSel").value; S.trained=$("trained").checked; S.gear=parseInt($("gear").value,10)||0; S.extra=parseInt($("extra").value,10)||0; S.weary=$("weary").checked;
+    S.dc=Math.max(1,Math.min(40,parseInt($("dc").value,10)||10));
+    W.purse.forEach(([k])=>{ S[k]=Math.max(0,parseInt($("p_"+k).value,10)||0); });
+    if(world==="compass"){ S.progOn=$("progOn").checked; S.progTarget=Math.max(1,parseInt($("progTarget").value,10)||4); S.solo=$("solo").checked; }
+  }
+  function roll(isRally){
+    readInputs();
+    let a=d20(), b=null, kept=a;
+    if(S.mode!=="normal"){ b=d20(); kept=S.mode==="adv"?Math.max(a,b):Math.min(a,b); }
+    const st=mod(S.stats[S.stat]), pr=S.trained?S.prof:0, bn=bonusTotal(), wy=(W.miss==="weary"&&S.weary)?-1:0;
+    const total=kept+st+pr+bn+wy;
+    const nat20=kept===20, nat1=kept===1;
+    const hit=nat20||(!nat1&&total>=S.dc);
+    $("dice").innerHTML=b===null?dieSVG(kept):dieSVG(kept)+dieSVG(kept===a?b:a,true);
+    $("dice").querySelectorAll(".d20").forEach(d=>{ d.classList.remove("spin"); void d.getBoundingClientRect(); d.classList.add("spin"); });
+    const parts=[`${kept}`,`${sign(st)} ${S.stat}`]; if(pr) parts.push(`${sign(pr)} trained`); if(bn) parts.push(`${sign(bn)} ${W.cap?"bonuses":"gear & bonus"}`); if(wy) parts.push("−1 weary");
+    $("math").textContent=`${parts.join(" ")} = ${total} vs DC ${S.dc}${b!==null?`  (rolled ${a} & ${b})`:""}`;
+    const v=$("verdict"); v.className="verdict "+(hit?"hit":"miss");
+    let note="";
+    if(nat20){ v.textContent="Natural 20!"; note="Always a success, with a little extra."; }
+    else if(nat1){ v.textContent="Natural 1"; note="A complication, never a catastrophe. The story twists."; }
+    else if(hit){ v.textContent=total-S.dc>=5?"Strong hit!":"Hit!"; note="Read the Hit result."; }
+    else { v.textContent="Miss"; note="Read the Miss result. The story bends, it doesn't break."; }
+    if(world==="compass"&&S.progOn&&hit){ const gain=(nat20||total-S.dc>=5)?3:2; S.prog=(S.prog||0)+gain; note+=` +${gain} Progress.`; }
+    if(isRally) note+=" (Rally roll)";
+    $("note").textContent=note;
+    $("rally").hidden=hit||isRally;
+    if(S.mode!=="normal"&&world==="compass"&&S._spent){ S.mode="normal"; S._spent=false; }
+    S.history.unshift({t:total,k:kept,dc:S.dc,h:hit,r:!!isRally,s:S.stat}); S.history=S.history.slice(0,12);
+    S.example=false; render(); save();
+  }
+  function renderHistory(){
+    const ul=$("history"); ul.innerHTML="";
+    if(!S.history.length){ ul.innerHTML="<li><span>No rolls yet</span></li>"; return; }
+    S.history.forEach(h=>{ const li=document.createElement("li"); const n=v=>Number.isFinite(+v)?String(+v):"?", s=String(h.s||"").replace(/[^A-Za-z]/g,"").slice(0,12); li.innerHTML=`<span>d20 ${n(h.k)} · ${s}${h.r?" · rally":""}</span><span class="${h.h?"h":"m"}">${n(h.t)} vs ${n(h.dc)} ${h.h?"hit":"miss"}</span>`; ul.appendChild(li); });
+  }
+  const SHARDS=["M54 6 C30 6 14 24 14 46 L54 46 Z","M54 6 C78 6 94 24 94 46 L54 46 Z","M14 46 L54 46 L54 92 L14 92 Z","M54 46 L94 46 L94 92 L54 92 Z","M14 92 L54 92 L54 144 L14 144 Z","M54 92 L94 92 L94 144 L54 144 Z"];
+  const COLORS=["var(--glass1)","var(--glass2)","var(--glass3)","var(--glass4)","var(--glass5)","var(--glass6)"];
+  function renderWindow(){
+    const lit=S.lit||0;
+    $("window").innerHTML=SHARDS.map((d,i)=>`<path d="${d}" class="${i<lit?"":"off"}" style="${i<lit?`fill:${COLORS[i]}`:""}"/>`).join("");
+    $("windowNote").textContent=lit>=6?"Window lit! A full day of tasks.":`${lit} of 6 shards colored today.`;
+  }
+  function addShard(){ if((S.lit||0)<6){ S.lit=(S.lit||0)+1; renderWindow(); save(); } }
+  function bump(r){ readInputs(); Object.entries(r).forEach(([k,v])=>{ S[k]=(S[k]||0)+v; }); S.example=false; render(); save(); }
+
+  document.addEventListener("input",e=>{ if(e.target.closest(".panel,.tray")&&e.target.matches("input,select")){ readInputs(); render(); save(); } });
+  $("worldChips").addEventListener("click",e=>{ const b=e.target.closest("[data-world]"); if(!b||b.dataset.world===world) return; readInputs(); save(); world=b.dataset.world; put("hdt-world",world); load(); build(); });
+  $("dcChips").addEventListener("click",e=>{ const b=e.target.closest("[data-dc]"); if(!b) return; $("dc").value=b.dataset.dc; readInputs(); render(); save(); });
+  $("modeChips").addEventListener("click",e=>{ const b=e.target.closest("[data-mode]"); if(!b) return; S.mode=b.dataset.mode; S._spent=false; render(); save(); });
+  $("spendAdv").addEventListener("click",()=>{ readInputs(); if((S.adv||0)<1){ $("note").textContent="No Advantage Tokens left. Earn them from real preparation, teamwork or levels."; return; } S.adv--; S.mode="adv"; S._spent=true; render(); save(); $("note").textContent="Token spent: your next roll has Advantage."; });
+  $("rollBtn").addEventListener("click",()=>roll(false));
+  $("rallyBtn").addEventListener("click",()=>{ $("rally").hidden=true; roll(true); });
+  $("wearyBtn").addEventListener("click",()=>{ readInputs(); $("rally").hidden=true;
+    if(W.miss==="weary"){ S.weary=true; $("note").textContent="Weary: −1 on your next roll until you do any Self-Care task (then untick it)."; }
+    else { S.strain=Math.min(3,(S.strain||0)+1); $("note").textContent="Took 1 Strain."; }
+    render(); save(); });
+  $("strainClear").addEventListener("click",()=>{ S.strain=Math.max(0,(S.strain||0)-1); render(); save(); });
+  $("progReset").addEventListener("click",()=>{ S.prog=0; render(); save(); });
+  $("beatBtn").addEventListener("click",()=>{ bump({xp:10}); addShard(); });
+  $("rewardBtns").addEventListener("click",e=>{ const b=e.target.closest("[data-reward]"); if(!b) return; bump(W.rewards[+b.dataset.reward][1]); });
+  $("shardBtn").addEventListener("click",addShard);
+  $("newDayBtn").addEventListener("click",()=>{ S.lit=0; renderWindow(); save(); });
+  let confirmReset=false;
+  $("resetHero").addEventListener("click",e=>{
+    if(!confirmReset){ confirmReset=true; e.target.textContent="Tap again to clear this hero"; setTimeout(()=>{confirmReset=false; e.target.textContent="Start a new hero";},4000); return; }
+    const blank=clone(W.sample); blank.name=""; Object.keys(blank.stats).forEach(k=>blank.stats[k]=10);
+    ["xp","coins","shards","tokens","adv","rec","lit","gear","extra","strain","prog"].forEach(k=>{ if(k in blank) blank[k]=0; });
+    blank.trained=false; blank.example=false; S=blank; S.history=[]; S.mode="normal";
+    confirmReset=false; e.target.textContent="Start a new hero"; build(); save();
+  });
+
+  let mins=2, left=120, tick=null, actx=null;
+  const fmt=s=>`${Math.floor(s/60)}:${String(s%60).padStart(2,"0")}`;
+  const showT=()=>{ $("timer").textContent=fmt(left); };
+  function stop(){ clearInterval(tick); tick=null; $("timerStart").textContent="Start"; }
+  function chime(){ try{ actx=actx||new (window.AudioContext||window.webkitAudioContext)(); [523.25,659.25,783.99].forEach((f,i)=>{ const o=actx.createOscillator(), g=actx.createGain(); o.frequency.value=f; o.type="sine"; g.gain.setValueAtTime(0.0001,actx.currentTime+i*.18); g.gain.exponentialRampToValueAtTime(0.18,actx.currentTime+i*.18+.02); g.gain.exponentialRampToValueAtTime(0.0001,actx.currentTime+i*.18+.9); o.connect(g).connect(actx.destination); o.start(actx.currentTime+i*.18); o.stop(actx.currentTime+i*.18+1); }); }catch(e){} }
+  $("timerChips").addEventListener("click",e=>{ const b=e.target.closest("[data-min]"); if(!b) return; mins=+b.dataset.min; [...$("timerChips").children].forEach(c=>c.setAttribute("aria-pressed",String(c===b))); stop(); left=mins*60; $("timer").classList.remove("done"); showT(); });
+  $("timerStart").addEventListener("click",()=>{
+    try{ actx=actx||new (window.AudioContext||window.webkitAudioContext)(); }catch(e){}
+    if(tick){ stop(); return; }
+    if(left<=0) left=mins*60;
+    $("timer").classList.remove("done"); $("timerStart").textContent="Pause";
+    const end=Date.now()+left*1000;
+    tick=setInterval(()=>{ left=Math.max(0,Math.round((end-Date.now())/1000)); showT(); if(left<=0){ stop(); $("timer").classList.add("done"); $("timer").textContent="Task counts!"; chime(); } },250);
+  });
+  $("timerReset").addEventListener("click",()=>{ stop(); left=mins*60; $("timer").classList.remove("done"); showT(); });
+
+  load(); build(); showT();
+})();
+</script>
+
+<style>body{padding-top:max(20px, env(safe-area-inset-top));padding-bottom:max(48px, env(safe-area-inset-bottom))}</style>
+<script>
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", () => { navigator.serviceWorker.register("sw.js").catch(() => {}); });
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,18 @@
+{
+  "name": "Hero's Dice Tray",
+  "short_name": "Dice Tray",
+  "description": "A free, private d20 dice tray for The Ashen Reach Chronicles and The Broken Compass. No ads, no accounts, works offline.",
+  "id": "./",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#e7ebe5",
+  "theme_color": "#2c4638",
+  "categories": ["games", "lifestyle"],
+  "icons": [
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}
