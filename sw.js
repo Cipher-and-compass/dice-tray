@@ -1,6 +1,6 @@
 // Hero's Dice Tray: offline support. Keeps a copy of the app on the phone.
 // When you change any file, bump VERSION so phones fetch the new copy.
-const VERSION = "dice-tray-v3";
+const VERSION = "dice-tray-v4";
 const FILES = [
   "./", "index.html", "manifest.webmanifest",
   "icons/icon-192.png", "icons/icon-512.png", "icons/icon-maskable-512.png",

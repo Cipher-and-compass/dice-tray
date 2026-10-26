@@ -428,7 +428,7 @@ table.mini th{text-align:left}
     const v=$("verdict"); v.className="verdict "+(hit?"hit":"miss");
     let note="";
     if(nat20){ v.textContent="Natural 20!"; note="Always a success, with a little extra."; }
-    else if(nat1){ v.textContent="Natural 1"; note="A complication, never a catastrophe. The story twists."; }
+    else if(nat1){ v.textContent="Natural 1"; note="A complication, never a catastrophe. You also take the Number One debuff: hold up one finger and whisper \u201cnumber one\u201d 3 times. Until your next task is done, whenever you hear or see a 1 in the story, finger up and whisper it again."; }
     else if(hit){ v.textContent=total-S.dc>=5?"Strong hit!":"Hit!"; note="Read the Hit result."; }
     else { v.textContent="Miss"; note="Read the Miss result. The story bends, it doesn't break."; }
     if(world==="compass"&&S.progOn&&hit){ const gain=(nat20||total-S.dc>=5)?3:2; S.prog=(S.prog||0)+gain; note+=` +${gain} Progress.`; }
